@@ -17,3 +17,5 @@ export async function changePassword(req, res) {
   const result = await changePasswordService(studentId, oldPassword, newPassword);
   return res.json(result);
 }
+
+
