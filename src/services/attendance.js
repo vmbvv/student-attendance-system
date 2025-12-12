@@ -1,6 +1,11 @@
 import { db } from "../db.js";
 
-export async function upsertAttendanceService(teacherId, studentId, date, attendance) {
+export async function upsertAttendanceService(
+  teacherId,
+  studentId,
+  date,
+  attendance
+) {
   // TODO: student тухайн багшийнх эсэхийг teacher_id-гаар баталгаажуулах
   // TODO: attendance_history дээр (student_id, date) UPSERT хийх
   return { ok: false, todo: true };

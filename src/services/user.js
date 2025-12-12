@@ -8,7 +8,7 @@ export async function registerTeacherService(
 ) {
   // TODO: INSERT INTO users (firstname, lastname, age, password, role) VALUES ($1, $2, $3, $4, 'teacher') RETURNING id
   const response = await db.query(
-    `INSERT INTO users (firstname, lastname, age, password, role) VALUES ($1, $2, $3, $4, 'teacher' RETRUNING id`,
+    `INSERT INTO users (firstname, lastname, age, password, role) VALUES ($1, $2, $3, $4, 'teacher') RETURNING id`,
     [firstname, lastname, age, password]
   );
   return response.rows[0];
@@ -16,7 +16,8 @@ export async function registerTeacherService(
 
 export async function loginTeacherService(id, password) {
   // TODO: багшийн id, нууц үгийг users хүснэгтээс шалгах
-
+  const teachers = await db.query(`SELECT * FROM users WHERE role = 'teacher'`);
+  console.log(teachers);
   // TODO: амжилттай бол cookie-нд хадгалах teacher_id утгыг backend-ээс буцаах
   return { ok: false, todo: true };
 }
