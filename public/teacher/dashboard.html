@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <h1>Teacher Dashboard</h1>
+
+    <section>
+      <h2>Your Students</h2>
+      <form id="search-form">
+        <div>
+          <label for="search">Search by name</label>
+          <input id="search" name="search" placeholder="Search by name" />
+        </div>
+        <button type="submit">Search</button>
+      </form>
+      <ul id="students-list"></ul>
+    </section>
+
+    <section>
+      <h2>Add Student</h2>
+      <form id="add-student-form">
+        <div>
+          <label for="firstname">First name</label>
+          <input id="firstname" name="firstname" required />
+        </div>
+        <div>
+          <label for="lastname">Last name</label>
+          <input id="lastname" name="lastname" required />
+        </div>
+        <div>
+          <label for="age">Age</label>
+          <input id="age" name="age" type="number" min="0" />
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required />
+        </div>
+        <button type="submit">Create Student</button>
+      </form>
+      <div id="add-student-status" class="status"></div>
+    </section>
+
+    <section>
+      <h2>Attendance</h2>
+      <form id="attendance-form">
+        <div>
+          <label for="studentId">Student ID</label>
+          <input id="studentId" name="studentId" required />
+        </div>
+        <div>
+          <label for="date">Date</label>
+          <input id="date" name="date" type="date" required />
+        </div>
+        <div>
+          <label for="attendance">Status</label>
+          <select id="attendance" name="attendance" required>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="excused">Excused</option>
+          </select>
+        </div>
+        <button type="submit">Save Attendance</button>
+      </form>
+      <div id="attendance-status" class="status"></div>
+      <div>
+        <button id="load-attendance">Load Attendance For Date</button>
+        <ul id="attendance-list"></ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Summary</h2>
+      <button id="load-summary">Load Summary</button>
+      <ul id="summary-list"></ul>
+    </section>
+
+    <p class="meta"><a href="/auth/login.html">Back to login</a></p>
+  </main>
+  <script src="/teacher/dashboard.js" type="module" defer></script>
+</body>
+</html>
