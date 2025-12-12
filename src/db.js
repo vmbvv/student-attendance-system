@@ -16,3 +16,4 @@ export const db = new pg.Client(config);
 export async function connectDb() {
   await db.connect();
 }
+
