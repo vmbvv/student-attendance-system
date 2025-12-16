@@ -6,7 +6,7 @@ export async function registerTeacherService(
   age,
   password
 ) {
-  // TODO: INSERT INTO users (firstname, lastname, age, password, role) VALUES ($1, $2, $3, $4, 'teacher') RETURNING id
+  //  INSERT INTO users (firstname, lastname, age, password, role) VALUES ($1, $2, $3, $4, 'teacher') RETURNING id
   const { rows } = await db.query(
     `INSERT INTO users (firstname, lastname, age, password, role) VALUES ($1, $2, $3, $4, 'teacher') RETURNING id`,
     [firstname, lastname, age ?? null, password]
@@ -15,25 +15,25 @@ export async function registerTeacherService(
 }
 
 export async function loginTeacherService(id, password) {
-  // TODO: багшийн id, нууц үгийг users хүснэгтээс шалгах
+  //  багшийн id, нууц үгийг users хүснэгтээс шалгах
   const { rows } = await db.query(
     `SELECT id, password FROM users WHERE id = $1 AND role = 'teacher'`,
     [id]
   );
 
   if (rows.length === 0) {
-    return { ok: false, message: "Teacher not found" };
+    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
   }
 
   if (rows[0].password !== password) {
-    return { ok: false, message: "Incorrect password" };
+    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
   }
-  // TODO: амжилттай бол cookie-нд хадгалах teacher_id утгыг backend-ээс буцаах
+  //  амжилттай бол cookie-нд хадгалах teacher_id утгыг backend-ээс буцаах
   return { ok: true, id: rows[0].id };
 }
 
 export async function loginStudentService(id, password) {
-  // TODO: сурагчийн id, нууц үгийг users хүснэгтээс шалгах
+  //  сурагчийн id, нууц үгийг users хүснэгтээс шалгах
 
   const { rows } = await db.query(
     `SELECT id, password FROM users WHERE id = $1 AND role = 'student`,
@@ -41,18 +41,18 @@ export async function loginStudentService(id, password) {
   );
 
   if (rows.length === 0) {
-    return { ok: false, message: "Student not found" };
+    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
   }
 
   if (rows[0].password !== password) {
-    return { ok: false, message: "Incorrect password" };
+    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
   }
 
-  // TODO: амжилттай бол cookie-нд хадгалах student_id утгыг backend-ээс буцаах
+  //  амжилттай бол cookie-нд хадгалах student_id утгыг backend-ээс буцаах
   return { ok: true, id: rows[0].id };
 }
 
 export async function logoutService() {
-  // TODO: logout хийхэд сервер талд cookie-г арилгах логик нэмэх
-  return { ok: true, message: "Logged out" };
+  //  logout хийхэд сервер талд cookie-г арилгах логик нэмэх
+  return { ok: true, message: "Системээс гарлаа" };
 }
