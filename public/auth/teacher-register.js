@@ -11,6 +11,25 @@ form.addEventListener("submit", (event) => {
     password: form.password.value,
   };
 
-  // TODO: fetch ашиглан /user/register-teacher рүү POST илгээх
-  result.textContent = "TODO: implement teacher registration request";
+  // fetch ашиглан /user/register-teacher рүү POST илгээх
+  result.textContent = "Аккоунт үүсгэж байна...";
+
+  fetch("/user/register-teacher", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify(payload),
+  })
+    .then(async (response) => {
+      const data = await response.json();
+      if (!response.ok || data.ok === false) {
+        throw new Error(data.message || "Бүргэлд алдаа гарлаа");
+      }
+      // Нэвтрэхэд ашиглах багшийн шинээр үүссэн ID харуулах
+      result.textContent = `Таны шинэ аккоунт үүслээ. Дараах ID нэвтрэх үед ашиглагдах тул тэмдэглэж авна уу! Багшийн ID: ${data.id}`;
+      form.reset();
+    })
+    .catch((err) => {
+      result.textContent = err.message || "Бүртгэл хийх боломжгүй байна";
+    });
 });
