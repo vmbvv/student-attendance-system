@@ -1,13 +1,19 @@
 import {
   getStudentsService,
+  getStudentService,
   createStudentService,
   deleteStudentService,
 } from "../services/teacher.js";
 
-export async function getStudents(req, res) {
+export const getStudents = async (req, res) => {
+  const { teacher_id } = req.params;
+  const result = await getStudentsService(teacher_id);
+  return res.json(result);
+};
+export async function getStudent(req, res) {
   const { teacherId } = req.params;
-  const { search } = req.query;
-  const result = await getStudentsService(teacherId, search);
+  const { studentId } = req.body;
+  const result = await getStudentService(teacherId, studentId);
   return res.json(result);
 }
 
@@ -15,7 +21,13 @@ export async function createStudent(req, res) {
   const { teacherId } = req.params;
   const { firstname, lastname, age, password } = req.body;
   // TODO: багш зөвхөн өөрийн сурагчдыг үүсгэх эрхтэй эсэхийг cookie-оос шалгах
-  const result = await createStudentService(teacherId, firstname, lastname, age, password);
+  const result = await createStudentService(
+    teacherId,
+    firstname,
+    lastname,
+    age,
+    password
+  );
   return res.json(result);
 }
 

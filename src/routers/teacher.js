@@ -3,6 +3,7 @@ import {
   getStudents,
   createStudent,
   deleteStudent,
+  getStudent,
 } from "../controllers/teacher.js";
 import {
   upsertAttendance,
@@ -11,8 +12,8 @@ import {
 } from "../controllers/attendance.js";
 
 export const teacherRouters = new Router();
-
-teacherRouters.get("/:teacherId/students", getStudents);
+teacherRouters.get("/students", getStudents);
+teacherRouters.get("/student", getStudent);
 teacherRouters.post("/:teacherId/students", createStudent);
 teacherRouters.delete("/:teacherId/students/:studentId", deleteStudent);
 teacherRouters.put("/:teacherId/attendance", upsertAttendance);
