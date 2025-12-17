@@ -13,8 +13,8 @@ import {
 
 export const teacherRouters = new Router();
 teacherRouters.get("/students", getStudents);
-teacherRouters.get("/student", getStudent);
-teacherRouters.post("/:teacherId/students", createStudent);
+teacherRouters.get("/student/:teacher_id/:id", getStudent);
+teacherRouters.post("/:teacherId/createStudent", createStudent);
 teacherRouters.delete("/:teacherId/students/:studentId", deleteStudent);
 teacherRouters.put("/:teacherId/attendance", upsertAttendance);
 teacherRouters.get("/:teacherId/attendance", getAttendanceByDate);
