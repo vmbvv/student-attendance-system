@@ -1,39 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <main class="page">
-    <h1>Student Dashboard</h1>
-
-    <section>
-      <h2>My Attendance</h2>
-      <button id="load-attendance">Load Attendance</button>
-      <ul id="attendance-list"></ul>
-    </section>
-
-    <section>
-      <h2>Change Password</h2>
-      <form id="password-form">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page dashboard">
+      <header class="dash-header">
         <div>
-          <label for="oldPassword">Old password</label>
-          <input id="oldPassword" name="oldPassword" type="password" required />
+          <p class="eyebrow">Сурагчийн самбар</p>
+          <h1>Тавтай морил</h1>
+          <p id="header-date" class="muted"></p>
         </div>
-        <div>
-          <label for="newPassword">New password</label>
-          <input id="newPassword" name="newPassword" type="password" required />
-        </div>
-        <button type="submit">Update Password</button>
-      </form>
-      <div id="password-status" class="status"></div>
-    </section>
+        <span id="student-badge" class="pill"></span>
+      </header>
 
-    <p class="meta"><a href="/auth/login.html">Back to login</a></p>
-  </main>
-  <script src="/student/dashboard.js" type="module" defer></script>
-</body>
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Миний ирц</h2>
+          <div class="inline">
+            <button type="button" id="month-prev">Өмнөх</button>
+            <span id="month-label" class="muted"></span>
+            <button type="button" id="month-next">Дараах</button>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <p class="muted">Суусан</p>
+            <strong id="stat-present">0</strong>
+          </div>
+          <div class="stat-card">
+            <p class="muted">Тасалсан</p>
+            <strong id="stat-absent">0</strong>
+          </div>
+          <div class="stat-card">
+            <p class="muted">Чөлөөтэй</p>
+            <strong id="stat-excused">0</strong>
+          </div>
+          <div class="stat-card">
+            <p class="muted">Суусан %</p>
+            <strong id="stat-present-percent">0.0%</strong>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span class="legend-item present">Суусан</span>
+          <span class="legend-item absent">Тасалсан</span>
+          <span class="legend-item excused">Чөлөөтэй</span>
+          <span class="legend-item empty">Хоосон</span>
+        </div>
+
+        <div id="calendar-wrap" class="student-detail">
+          <div id="calendar-status" class="status"></div>
+          <div id="calendar-content"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Нууц үг солих</h2>
+        </div>
+        <form id="password-form" class="card spaced">
+          <div class="grid-two">
+            <div>
+              <label for="oldPassword">Хуучин Нууц үг</label>
+              <input
+                id="oldPassword"
+                name="oldPassword"
+                type="password"
+                required
+              />
+            </div>
+            <div>
+              <label for="newPassword">Шинэ Нууц үг</label>
+              <input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                required
+              />
+            </div>
+          </div>
+          <button type="submit">Нууц үг шинэчлэх</button>
+          <div id="password-status" class="status"></div>
+        </form>
+      </section>
+
+      <p class="meta"><a href="/auth/login.html">Back to login</a></p>
+    </main>
+    <script src="/student/dashboard.js" type="module" defer></script>
+  </body>
 </html>

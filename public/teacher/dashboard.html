@@ -1,87 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teacher Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <main class="page">
-    <h1>Teacher Dashboard</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page dashboard">
+      <header class="dash-header">
+        <div>
+          <p class="eyebrow">Багшийн самбар</p>
+          <h1>Тавтай морил</h1>
+          <p id="header-date" class="muted"></p>
+        </div>
+        <div class="header-actions">
+          <span id="teacher-id" class="pill"></span>
+          <a href="/auth/login.html">Системээс гарах</a>
+        </div>
+      </header>
 
-    <section>
-      <h2>Your Students</h2>
-      <form id="search-form">
-        <div>
-          <label for="search">Search by name</label>
-          <input id="search" name="search" placeholder="Search by name" />
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Тойм</h2>
+          <div id="overview-status" class="status"></div>
         </div>
-        <button type="submit">Search</button>
-      </form>
-      <ul id="students-list"></ul>
-    </section>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <p class="muted">Нийт сурагчид</p>
+            <strong id="stat-students">0</strong>
+          </div>
+          <div class="stat-card">
+            <p class="muted">Бүртгэсэн</p>
+            <strong id="stat-marked">0</strong>
+          </div>
+          <div class="stat-card">
+            <p class="muted">Бүртгээгүй</p>
+            <strong id="stat-unmarked">0</strong>
+          </div>
+        </div>
+      </section>
 
-    <section>
-      <h2>Add Student</h2>
-      <form id="add-student-form">
-        <div>
-          <label for="firstname">First name</label>
-          <input id="firstname" name="firstname" required />
-        </div>
-        <div>
-          <label for="lastname">Last name</label>
-          <input id="lastname" name="lastname" required />
-        </div>
-        <div>
-          <label for="age">Age</label>
-          <input id="age" name="age" type="number" min="0" />
-        </div>
-        <div>
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password" required />
-        </div>
-        <button type="submit">Create Student</button>
-      </form>
-      <div id="add-student-status" class="status"></div>
-    </section>
+      <div class="layout">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Жагсаалт</h2>
+            <div class="pill secondary" id="roster-count">0</div>
+          </div>
 
-    <section>
-      <h2>Attendance</h2>
-      <form id="attendance-form">
-        <div>
-          <label for="studentId">Student ID</label>
-          <input id="studentId" name="studentId" required />
-        </div>
-        <div>
-          <label for="date">Date</label>
-          <input id="date" name="date" type="date" required />
-        </div>
-        <div>
-          <label for="attendance">Status</label>
-          <select id="attendance" name="attendance" required>
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
-            <option value="excused">Excused</option>
-          </select>
-        </div>
-        <button type="submit">Save Attendance</button>
-      </form>
-      <div id="attendance-status" class="status"></div>
-      <div>
-        <button id="load-attendance">Load Attendance For Date</button>
-        <ul id="attendance-list"></ul>
+          <div class="stack">
+            <label for="student-search">Нэрээр хайх</label>
+            <input
+              id="student-search"
+              name="search"
+              placeholder="Нэрийг оруулна уу"
+              autocomplete="off"
+            />
+          </div>
+
+          <button type="button" id="toggle-add-student">Сурагч нэмэх</button>
+          <form id="add-student-form" class="card spaced hidden">
+            <div class="grid-two">
+              <div>
+                <label for="firstname">Нэр</label>
+                <input id="firstname" name="firstname" required />
+              </div>
+              <div>
+                <label for="lastname">Овог</label>
+                <input id="lastname" name="lastname" required />
+              </div>
+            </div>
+            <div class="grid-two">
+              <div>
+                <label for="age">Нас</label>
+                <input id="age" name="age" type="number" min="0" />
+              </div>
+              <div>
+                <label for="password">Нууц үг</label>
+                <input id="password" name="password" type="password" required />
+              </div>
+            </div>
+            <button type="submit">Сурагч нэмэх</button>
+            <div id="add-student-status" class="status"></div>
+          </form>
+
+          <ul id="students-list" class="list"></ul>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Ирц</h2>
+            <div class="inline">
+              <label class="muted" for="attendance-date">Огноо</label>
+              <input id="attendance-date" type="date" />
+              <button type="button" id="reload-attendance">Ачаалах</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="simple-table">
+              <thead>
+                <tr>
+                  <th>Сурагч</th>
+                  <th>ID</th>
+                  <th>Статус</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-table-body"></tbody>
+            </table>
+          </div>
+          <div class="panel-foot">
+            <div id="attendance-status" class="status"></div>
+            <button type="button" id="save-attendance">Хадгалах</button>
+          </div>
+        </section>
       </div>
-    </section>
 
-    <section>
-      <h2>Summary</h2>
-      <button id="load-summary">Load Summary</button>
-      <ul id="summary-list"></ul>
-    </section>
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Сурагчийн ирц</h2>
+          <div class="inline">
+            <button type="button" id="month-prev">Өмнөх</button>
+            <span id="month-label" class="muted"></span>
+            <button type="button" id="month-next">Дараах</button>
+          </div>
+        </div>
+        <div id="student-detail-content" class="student-detail muted">
+          Сурагчийн нэрэн дээр дарж ирцийг харна уу
+        </div>
+      </section>
 
-    <p class="meta"><a href="/auth/login.html">Back to login</a></p>
-  </main>
-  <script src="/teacher/dashboard.js" type="module" defer></script>
-</body>
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Хураангуй</h2>
+          <div class="inline">
+            <label for="summary-sort" class="muted">Эрэмбэлэх</label>
+            <select id="summary-sort">
+              <option value="">Нэрээр</option>
+              <option value="present_percent">Суусан %</option>
+              <option value="present_count">Суусан тоогоор</option>
+              <option value="absent_count">Тасалсан тоогоор</option>
+              <option value="total_days">Нийт өдрөөр</option>
+            </select>
+            <button type="button" id="load-summary">Шинэчлэх</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="simple-table">
+            <thead>
+              <tr>
+                <th>Нэр</th>
+                <th>Суусан %</th>
+                <th>Суусан</th>
+                <th>Тасалсан</th>
+                <th>Чөлөөтэй</th>
+                <th>Нийт</th>
+              </tr>
+            </thead>
+            <tbody id="summary-body"></tbody>
+          </table>
+        </div>
+        <div id="summary-status" class="status"></div>
+      </section>
+    </main>
+    <script src="/teacher/dashboard.js" type="module" defer></script>
+  </body>
 </html>

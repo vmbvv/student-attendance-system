@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Avoid timezone-related off-by-one issues when reading DATE columns (e.g. attendance_history.date).
+pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
+
 const config = {
   connectionString: process.env.DATABASE_URL,
 };

@@ -23,7 +23,7 @@ form.addEventListener("submit", (event) => {
     .then(async (response) => {
       const data = await response.json();
       if (!response.ok || data.ok === false) {
-        throw new Error(data.message || "Бүргэлд алдаа гарлаа");
+        throw new Error(data.message || "Бүртгэлд алдаа гарлаа");
       }
       // Нэвтрэхэд ашиглах багшийн шинээр үүссэн ID харуулах
       result.textContent = `Таны шинэ аккоунт үүслээ. Дараах ID нэвтрэх үед ашиглагдах тул тэмдэглэж авна уу! Багшийн ID: ${data.id}`;
