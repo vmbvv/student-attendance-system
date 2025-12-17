@@ -1,37 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teacher Register</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <main class="page">
-    <h1>Teacher Register</h1>
-    <p>Create a teacher account to get started.</p>
-    <form id="register-form">
-      <div>
-        <label for="firstname">First name</label>
-        <input id="firstname" name="firstname" required />
-      </div>
-      <div>
-        <label for="lastname">Last name</label>
-        <input id="lastname" name="lastname" required />
-      </div>
-      <div>
-        <label for="age">Age</label>
-        <input id="age" name="age" type="number" min="0" />
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" required />
-      </div>
-      <button type="submit">Create Account</button>
-    </form>
-    <div id="result" class="status"></div>
-    <p class="meta"><a href="/auth/login.html">Back to login</a></p>
-  </main>
-  <script src="/auth/teacher-register.js" type="module" defer></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Register</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <h1>Багш бүртгүүлэх</h1>
+      <form id="register-form">
+        <div>
+          <label for="firstname">Нэр</label>
+          <input id="firstname" name="firstname" required />
+        </div>
+        <div>
+          <label for="lastname">Овог</label>
+          <input id="lastname" name="lastname" required />
+        </div>
+        <div>
+          <label for="age">Нас</label>
+          <input id="age" name="age" type="number" min="0" />
+        </div>
+        <div>
+          <label for="password">Нууц үг</label>
+          <input id="password" name="password" type="password" required />
+        </div>
+        <button type="submit">Аккоунт үүсгэх</button>
+      </form>
+      <div id="result" class="status"></div>
+      <p class="meta"><a href="/auth/login.html">Нэвтрэх цэсрүү буцах</a></p>
+    </main>
+    <script src="/auth/teacher-register.js" type="module" defer></script>
+  </body>
 </html>

@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body class="auth-layout">
-  <div class="card">
-    <h1>Login</h1>
-    <p>Select your role and sign in.</p>
-    <form id="login-form">
-      <div>
-        <label for="role">Role</label>
-        <select id="role" name="role" required>
-          <option value="teacher">Teacher</option>
-          <option value="student">Student</option>
-        </select>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="auth-layout">
+    <div class="card">
+      <h1>Нэвтрэх</h1>
+      <p>Багш эсвэл сурагчаас сонгон нэвтэрнэ үү</p>
+      <form id="login-form">
+        <div>
+          <label for="role">Багш/Сурагч</label>
+          <select id="role" name="role" required>
+            <option value="teacher">Багш</option>
+            <option value="student">Сурагч</option>
+          </select>
+        </div>
+        <div>
+          <label for="userId">ID</label>
+          <input id="userId" name="userId" required />
+        </div>
+        <div>
+          <label for="password">Нууц үг</label>
+          <input id="password" name="password" type="password" required />
+        </div>
+        <button type="submit">Нэвтрэх</button>
+      </form>
+      <div class="meta">
+        <a href="/auth/teacher-register.html">Багш бүртгүүлэх</a>
       </div>
-      <div>
-        <label for="userId">ID</label>
-        <input id="userId" name="userId" required />
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" required />
-      </div>
-      <button type="submit">Login</button>
-    </form>
-    <div class="meta">
-      <a href="/auth/teacher-register.html">Teacher register</a>
+      <div id="status" class="status"></div>
     </div>
-    <div id="status" class="status"></div>
-  </div>
-  <script src="/auth/login.js" type="module" defer></script>
-</body>
+    <script src="/auth/login.js" type="module" defer></script>
+  </body>
 </html>

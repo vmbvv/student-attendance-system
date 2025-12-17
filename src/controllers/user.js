@@ -22,7 +22,7 @@ export async function registerTeacher(req, res) {
     );
     return res.json(result);
   } catch (err) {
-    console.error("Багшыг бүргүүлэхэд алдаа гарлаа", err);
+    console.error("Багшыг бүртгүүлэхэд алдаа гарлаа", err);
     return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
   }
 }
@@ -43,7 +43,7 @@ export async function loginTeacher(req, res) {
     return res.json(result);
   } catch (err) {
     console.error("Багш нэвтрэхэд алдаа гарлаа", err);
-    return res.status(500).json({ ok: false, message: "Сервэрт алдаа гарлаа" });
+    return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
   }
 }
 
@@ -63,7 +63,7 @@ export async function loginStudent(req, res) {
     return res.json(result);
   } catch (err) {
     console.error("Сурагч нэвтрэхэд алдаа гарлаа", err);
-    return res.status(500).json({ ok: false, message: "Сервэрт алдаа гарлаа" });
+    return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
   }
 }
 

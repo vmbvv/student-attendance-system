@@ -22,11 +22,11 @@ export async function loginTeacherService(id, password) {
   );
 
   if (rows.length === 0) {
-    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
+    return { ok: false, message: "ID эсвэл Нууц үг буруу байна!" };
   }
 
   if (rows[0].password !== password) {
-    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
+    return { ok: false, message: "ID эсвэл Нууц үг буруу байна!" };
   }
   //  амжилттай бол cookie-нд хадгалах teacher_id утгыг backend-ээс буцаах
   return { ok: true, id: rows[0].id };
@@ -41,11 +41,11 @@ export async function loginStudentService(id, password) {
   );
 
   if (rows.length === 0) {
-    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
+    return { ok: false, message: "ID эсвэл Нууц үг буруу байна!" };
   }
 
   if (rows[0].password !== password) {
-    return { ok: false, message: "ID эсвэл пассворд буруу байна!" };
+    return { ok: false, message: "ID эсвэл Нууц үг буруу байна!" };
   }
 
   //  амжилттай бол cookie-нд хадгалах student_id утгыг backend-ээс буцаах
