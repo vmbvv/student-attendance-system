@@ -1,5 +1,3 @@
-import { response } from "express";
-
 const form = document.getElementById("login-form");
 const statusEl = document.getElementById("status");
 

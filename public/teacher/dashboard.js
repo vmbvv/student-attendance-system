@@ -7,7 +7,7 @@ const statUnmarked = document.getElementById("stat-unmarked");
 
 const studentSearch = document.getElementById("student-search");
 const toggleAddStudentBtn = document.getElementById("toggle-add-student");
-const addStudentForm = document.getElementById("add-student-btn");
+const addStudentForm = document.getElementById("add-student-form");
 const addStudentStatus = document.getElementById("add-student-status");
 const studentsList = document.getElementById("students-list");
 const rosterCount = document.getElementById("roster-count");
@@ -148,7 +148,7 @@ function renderStudents(students) {
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.dataset.deleteStudent = student.id;
-    removeBtn.textContent = "Remove";
+    removeBtn.textContent = "Хасах";
     actions.appendChild(removeBtn);
 
     li.appendChild(info);
@@ -356,7 +356,7 @@ async function loadSummary() {
 
 async function handleAddStudent(event) {
   event.preventDefault();
-  addStudentStatus.textContent = "Сурагчийг хадгалж байна";
+  addStudentStatus.textContent = "Сурагчийг хадгалж байна...";
 
   const payload = {
     firstname: addStudentForm.firstname.value.trim(),
