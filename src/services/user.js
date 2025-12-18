@@ -36,7 +36,7 @@ export async function loginStudentService(id, password) {
   //  сурагчийн id, нууц үгийг users хүснэгтээс шалгах
 
   const { rows } = await db.query(
-    `SELECT id, password FROM users WHERE id = $1 AND role = 'student`,
+    `SELECT id, password FROM users WHERE id = $1 AND role = 'student'`,
     [id]
   );
 
