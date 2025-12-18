@@ -1,6 +1,5 @@
 import { response } from "express";
 import { db } from "../db.js";
-import pg from "pg";
 
 export const getStudentsService = async () => {
   const response = await db.query(`SELECT * FROM users WHERE role = 'student'`);
@@ -19,12 +18,16 @@ export const createStudentService = async (
   age,
   password
 ) => {
-  `INSERT INTO users (teacher_id, firstname, lastname, age, password) VALUES ($1, $2, $3, $4, $5, 'student') RETURNING id`;
-  [teacher_id, firstname, lastname, age, password];
+  const response = await db.query(
+    `INSERT INTO users (teacher_id, firstname, lastname, age, password, role) VALUES ($1, $2, $3, $4, $5, 'student') RETURNING id`,
+    [teacher_id, firstname, lastname, age, password]
+  );
   return response.rows;
 };
 
-export async function deleteStudentService(teacherId, studentId) {
-  // TODO: DELETE FROM users WHERE id = $1 AND teacher_id = $2 AND role = 'student'
-  return { ok: false, todo: true };
-}
+export const deleteStudentService = async (id) => {
+  const response = db.query(
+    `DELETE FROM users WHERE id = ${id} AND role = 'student'`
+  );
+  return response.rows;
+};

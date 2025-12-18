@@ -19,7 +19,6 @@ export const getStudent = async (req, res) => {
 export const createStudent = async (req, res) => {
   const { teacher_id } = req.params;
   const { firstname, lastname, age, password } = req.body;
-
   const result = await createStudentService(
     teacher_id,
     firstname,
@@ -31,8 +30,7 @@ export const createStudent = async (req, res) => {
 };
 
 export const deleteStudent = async (req, res) => {
-  const { teacher_id, id } = req.params;
-  // TODO: устгах сурагч тухайн багшийнх эсэхийг cookie-оор шалгах
-  const result = await deleteStudentService(teacher_id, id);
+  const { id } = req.params;
+  const result = await deleteStudentService(id);
   return res.json(result);
 };
