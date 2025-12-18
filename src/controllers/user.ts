@@ -4,14 +4,16 @@ import {
   loginStudentService,
   logoutService,
 } from "../services/user.js";
+import { RequestHandler } from "express";
+import { User, Cookie } from "../types/type.js";
 
-const authCookieOptions = {
+const authCookieOptions: Cookie = {
   httpOnly: false,
   sameSite: "lax",
   path: "/",
 };
 
-export async function registerTeacher(req, res) {
+export const registerTeacher: RequestHandler<User> = async (req, res) => {
   try {
     const { firstname, lastname, age, password } = req.body;
     const result = await registerTeacherService(
@@ -25,9 +27,10 @@ export async function registerTeacher(req, res) {
     console.error("Багшыг бүртгүүлэхэд алдаа гарлаа", err);
     return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
   }
-}
+};
 
-export async function loginTeacher(req, res) {
+type loginBody = { id: string | number; password: string | number };
+export const loginTeacher: RequestHandler<loginBody> = async (req, res) => {
   try {
     const { id, password } = req.body;
     //  login амжилттай бол багшийн cookie тохируулах (document.cookie / res.cookie ашиглах)
@@ -45,9 +48,9 @@ export async function loginTeacher(req, res) {
     console.error("Багш нэвтрэхэд алдаа гарлаа", err);
     return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
   }
-}
+};
 
-export async function loginStudent(req, res) {
+export const loginStudent: RequestHandler<loginBody> = async (req, res) => {
   try {
     const { id, password } = req.body;
     //  login амжилттай бол сурагчийн cookie тохируулах (document.cookie / res.cookie ашиглах)
@@ -65,9 +68,9 @@ export async function loginStudent(req, res) {
     console.error("Сурагч нэвтрэхэд алдаа гарлаа", err);
     return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
   }
-}
+};
 
-export async function logout(req, res) {
+export const logout: RequestHandler<any> = async (req, res) => {
   //  logout хийхэд cookie-г арилгах (res.clearCookie / document.cookie)
   try {
     res.clearCookie("teacherId", authCookieOptions);
@@ -78,4 +81,4 @@ export async function logout(req, res) {
     console.error("Системээс гарахад алдаа гарлаа", err);
     return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
   }
-}
+};

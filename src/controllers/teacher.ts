@@ -4,8 +4,11 @@ import {
   deleteStudentService,
   getTeacherProfileService,
 } from "../services/teacher.js";
+import { RequestHandler } from "express";
+import { User } from "../types/type.js";
 
-function verifyTeacherCookie(req, res, teacherId) {
+type verifyCookie = {};
+const verifyTeacherCookie: RequestHandler = (req, res, teacherId) => {
   const cookieTeacherId = req.cookies?.teacherId;
   if (!cookieTeacherId || String(cookieTeacherId) !== String(teacherId)) {
     res.status(401).json({
@@ -15,9 +18,9 @@ function verifyTeacherCookie(req, res, teacherId) {
     return false;
   }
   return true;
-}
+};
 
-export async function getStudents(req, res) {
+export async function getStudents(req: RequestHandler, res: RequestHandler) {
   const { teacherId } = req.params;
   if (!verifyTeacherCookie(req, res, teacherId)) return;
 

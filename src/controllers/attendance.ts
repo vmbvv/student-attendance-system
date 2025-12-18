@@ -5,6 +5,9 @@ import {
   getStudentAttendanceHistoryService,
 } from "../services/attendance.js";
 
+import { RequestHandler } from "express";
+import { User } from "../types/type.js";
+
 function verifyTeacherCookie(req, res, teacherId) {
   const cookieTeacherId = req.cookies?.teacherId;
   if (!cookieTeacherId || String(cookieTeacherId) !== String(teacherId)) {

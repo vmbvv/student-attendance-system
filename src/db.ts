@@ -6,7 +6,12 @@ dotenv.config();
 // Avoid timezone-related off-by-one issues when reading DATE columns (e.g. attendance_history.date).
 pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
 
-const config = {
+interface Config {
+  connectionString?: string | undefined;
+  ssl?: any;
+}
+
+const config: Config = {
   connectionString: process.env.DATABASE_URL,
 };
 
