@@ -5,6 +5,7 @@ import {
   createStudent,
   deleteStudent,
   getTeacherProfile,
+  changeTeacherPassword,
 } from "../controllers/teacher.js";
 import {
   upsertAttendance,
@@ -21,6 +22,7 @@ teacherRouters.get("/students", getStudents);
 teacherRouters.post("/students", createStudent);
 teacherRouters.delete("/students/:studentId", deleteStudent);
 teacherRouters.get("/profile", getTeacherProfile);
+teacherRouters.patch("/password", changeTeacherPassword);
 teacherRouters.get(
   "/students/:studentId/attendance-history",
   getStudentAttendanceHistory

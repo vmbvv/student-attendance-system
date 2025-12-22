@@ -12,6 +12,10 @@ const addStudentForm = document.getElementById("add-student-form");
 const addStudentStatus = document.getElementById("add-student-status");
 const studentsList = document.getElementById("students-list");
 const rosterCount = document.getElementById("roster-count");
+const studentsPrevBtn = document.getElementById("students-prev");
+const studentsNextBtn = document.getElementById("students-next");
+const studentsPageLabel = document.getElementById("students-page");
+const studentsLimitSelect = document.getElementById("students-limit");
 
 const attendanceDateInput = document.getElementById("attendance-date");
 const attendanceTableBody = document.getElementById("attendance-table-body");
@@ -21,8 +25,12 @@ const attendanceStatus = document.getElementById("attendance-status");
 
 const summarySort = document.getElementById("summary-sort");
 const loadSummaryBtn = document.getElementById("load-summary");
+const loadSummaryMoreBtn = document.getElementById("load-summary-more");
 const summaryBody = document.getElementById("summary-body");
 const summaryStatus = document.getElementById("summary-status");
+
+const teacherPasswordForm = document.getElementById("teacher-password-form");
+const teacherPasswordStatus = document.getElementById("teacher-password-status");
 
 const monthPrevBtn = document.getElementById("month-prev");
 const monthNextBtn = document.getElementById("month-next");
@@ -32,6 +40,13 @@ const studentDetailContent = document.getElementById("student-detail-content");
 const state = {
   teacherId: null,
   students: [],
+  studentsTotal: 0,
+  studentsPage: 1,
+  studentsLimit: 25,
+  studentsSearch: "",
+  summaryTotal: 0,
+  summaryPage: 1,
+  summaryLimit: 25,
   attendanceDate: null,
   attendanceCurrent: {},
   attendanceDraft: {},
@@ -64,6 +79,46 @@ async function fetchJson(url, options = {}) {
     throw error;
   }
   return data;
+}
+
+function wireUpTeacherPassword() {
+  if (!teacherPasswordForm || !teacherPasswordStatus) return;
+
+  teacherPasswordForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!state.teacherId) {
+      teacherPasswordStatus.textContent =
+        "Нууц үг солиход нэвтэрч орсон байх шаардлагатай";
+      return;
+    }
+
+    const payload = {
+      oldPassword: teacherPasswordForm.oldPassword.value,
+      newPassword: teacherPasswordForm.newPassword.value,
+      confirmNewPassword: teacherPasswordForm.confirmNewPassword.value,
+    };
+
+    if (payload.newPassword !== payload.confirmNewPassword) {
+      teacherPasswordStatus.textContent = "Нууц үг таарахгүй байна";
+      return;
+    }
+
+    teacherPasswordStatus.textContent = "Нууц үг сольж байна";
+
+    try {
+      await fetchJson(`/teacher/password`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      teacherPasswordStatus.textContent = "Нууц үг солигдлоо";
+      teacherPasswordForm.reset();
+    } catch (err) {
+      teacherPasswordStatus.textContent =
+        err.message || "Нууц үг солиход алдаа гарлаа";
+    }
+  });
 }
 
 function debounce(fn, delay = 300) {
@@ -126,8 +181,38 @@ function shiftMonth(month, delta) {
   )}`;
 }
 
+function getStudentsTotalPages() {
+  const total = Number(state.studentsTotal) || 0;
+  const limit = Number(state.studentsLimit) || 1;
+  return Math.max(Math.ceil(total / limit), 1);
+}
+
+function updateStudentsPagination() {
+  if (!studentsPageLabel) return;
+
+  const total = Number(state.studentsTotal) || 0;
+  const limit = Number(state.studentsLimit) || 1;
+  const totalPages = getStudentsTotalPages();
+  const page = Math.min(Math.max(Number(state.studentsPage) || 1, 1), totalPages);
+
+  state.studentsPage = page;
+
+  if (studentsPrevBtn) studentsPrevBtn.disabled = page <= 1;
+  if (studentsNextBtn) studentsNextBtn.disabled = page >= totalPages;
+  if (studentsLimitSelect) studentsLimitSelect.value = String(limit);
+
+  if (!total) {
+    studentsPageLabel.textContent = "0 / 0";
+    return;
+  }
+
+  const from = (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
+  studentsPageLabel.textContent = `${from}-${to} / ${total}`;
+}
+
 function updateOverview() {
-  const total = state.students.length;
+  const total = state.studentsTotal || state.students.length;
   const marked = Object.values(state.attendanceDraft).filter(Boolean).length;
   const unmarked = Math.max(total - marked, 0);
   statStudents.textContent = total;
@@ -171,29 +256,46 @@ function renderStudents(students) {
   });
 }
 
-async function loadStudents(searchText = "") {
+async function loadStudents(searchText = state.studentsSearch) {
+  const nextSearch = typeof searchText === "string" ? searchText.trim() : "";
+  if (nextSearch !== state.studentsSearch) {
+    state.studentsPage = 1;
+  }
+  state.studentsSearch = nextSearch;
+
   studentsList.textContent = "Сурагчдын листийн ачаалж байна";
   try {
-    const params = searchText
-      ? `?search=${encodeURIComponent(searchText)}`
-      : "";
-    const data = await fetchJson(
-      `/teacher/students${params}`
-    );
-    state.students = data;
-    renderStudents(data);
+    const params = new URLSearchParams();
+    if (state.studentsSearch) {
+      params.set("search", state.studentsSearch);
+    }
+    params.set("page", String(state.studentsPage));
+    params.set("limit", String(state.studentsLimit));
+
+    const data = await fetchJson(`/teacher/students?${params.toString()}`);
+    const students = Array.isArray(data.students) ? data.students : [];
+
+    state.students = students;
+    state.studentsTotal = Number(data.total) || 0;
+    state.studentsPage = Number(data.page) || state.studentsPage;
+    state.studentsLimit = Number(data.limit) || state.studentsLimit;
+
+    renderStudents(students);
+    updateStudentsPagination();
+    renderAttendanceTable();
     updateOverview();
 
     if (state.selectedStudentId) {
-      const stillExists = data.some(
+      const stillVisible = students.some(
         (s) => String(s.id) === String(state.selectedStudentId)
       );
-      if (!stillExists) {
+      if (!stillVisible) {
         state.selectedStudentId = null;
         state.selectedStudentName = "";
         state.studentRecords = [];
       }
     }
+
     renderStudentDetail();
   } catch (err) {
     studentsList.textContent =
@@ -324,13 +426,27 @@ async function saveAttendance() {
 async function loadSummary() {
   summaryStatus.textContent = "Ирцийн хураангуйг ачаалж байна";
   summaryBody.textContent = "";
+  state.summaryPage = 1;
+  state.summaryTotal = 0;
+  if (loadSummaryMoreBtn) {
+    loadSummaryMoreBtn.classList.add("hidden");
+    loadSummaryMoreBtn.disabled = true;
+  }
   try {
     const sort = summarySort.value;
-    const data = await fetchJson(
-      `/teacher/summary${sort ? `?sort=${encodeURIComponent(sort)}` : ""}`
-    );
+    const params = new URLSearchParams();
+    if (sort) params.set("sort", sort);
+    params.set("page", String(state.summaryPage));
+    params.set("limit", String(state.summaryLimit));
 
-    if (!data.length) {
+    const data = await fetchJson(`/teacher/summary?${params.toString()}`);
+    const items = Array.isArray(data.items) ? data.items : [];
+
+    state.summaryTotal = Number(data.total) || 0;
+    state.summaryPage = Number(data.page) || 1;
+    state.summaryLimit = Number(data.limit) || state.summaryLimit;
+
+    if (!items.length) {
       const row = document.createElement("tr");
       const cell = document.createElement("td");
       cell.colSpan = 6;
@@ -338,10 +454,14 @@ async function loadSummary() {
       row.appendChild(cell);
       summaryBody.appendChild(row);
       summaryStatus.textContent = "";
+      if (loadSummaryMoreBtn) {
+        loadSummaryMoreBtn.classList.add("hidden");
+      }
       return;
     }
 
-    data.forEach((item) => {
+    const fragment = document.createDocumentFragment();
+    items.forEach((item) => {
       const row = document.createElement("tr");
       const presentPercent =
         item.present_percent !== null
@@ -355,12 +475,82 @@ async function loadSummary() {
         <td>${item.excused_count}</td>
         <td>${item.total_days}</td>
       `;
-      summaryBody.appendChild(row);
+      fragment.appendChild(row);
     });
+    summaryBody.appendChild(fragment);
     summaryStatus.textContent = "";
+
+    const hasMore = state.summaryPage * state.summaryLimit < state.summaryTotal;
+    if (loadSummaryMoreBtn) {
+      loadSummaryMoreBtn.classList.toggle("hidden", !hasMore);
+      loadSummaryMoreBtn.disabled = false;
+    }
   } catch (err) {
     summaryStatus.textContent =
       err.message || "Ирцийн хураангуйг харуулахад алдаа гарлаа";
+    if (loadSummaryMoreBtn) {
+      loadSummaryMoreBtn.classList.add("hidden");
+      loadSummaryMoreBtn.disabled = false;
+    }
+  }
+}
+
+async function loadMoreSummary() {
+  const hasMore = state.summaryPage * state.summaryLimit < state.summaryTotal;
+  if (!hasMore) return;
+
+  if (loadSummaryMoreBtn) {
+    loadSummaryMoreBtn.disabled = true;
+  }
+  summaryStatus.textContent = "Нэмэлт мэдээлэл ачаалж байна";
+
+  try {
+    const sort = summarySort.value;
+    const params = new URLSearchParams();
+    if (sort) params.set("sort", sort);
+    params.set("page", String(state.summaryPage + 1));
+    params.set("limit", String(state.summaryLimit));
+
+    const data = await fetchJson(`/teacher/summary?${params.toString()}`);
+    const items = Array.isArray(data.items) ? data.items : [];
+
+    state.summaryTotal = Number(data.total) || state.summaryTotal;
+    state.summaryPage = Number(data.page) || state.summaryPage + 1;
+    state.summaryLimit = Number(data.limit) || state.summaryLimit;
+
+    const fragment = document.createDocumentFragment();
+    items.forEach((item) => {
+      const row = document.createElement("tr");
+      const presentPercent =
+        item.present_percent !== null
+          ? Number(item.present_percent).toFixed(1)
+          : "0.0";
+      row.innerHTML = `
+        <td>${item.firstname} ${item.lastname}</td>
+        <td>${presentPercent}%</td>
+        <td>${item.present_count}</td>
+        <td>${item.absent_count}</td>
+        <td>${item.excused_count}</td>
+        <td>${item.total_days}</td>
+      `;
+      fragment.appendChild(row);
+    });
+    summaryBody.appendChild(fragment);
+
+    summaryStatus.textContent = "";
+
+    const stillHasMore =
+      state.summaryPage * state.summaryLimit < state.summaryTotal;
+    if (loadSummaryMoreBtn) {
+      loadSummaryMoreBtn.classList.toggle("hidden", !stillHasMore);
+    }
+  } catch (err) {
+    summaryStatus.textContent =
+      err.message || "Ирцийн хураангуйг харуулахад алдаа гарлаа";
+  } finally {
+    if (loadSummaryMoreBtn) {
+      loadSummaryMoreBtn.disabled = false;
+    }
   }
 }
 
@@ -580,6 +770,33 @@ function wireUpRoster() {
 
   addStudentForm.addEventListener("submit", handleAddStudent);
 
+  if (studentsPrevBtn) {
+    studentsPrevBtn.addEventListener("click", () => {
+      if (state.studentsPage <= 1) return;
+      state.studentsPage -= 1;
+      loadStudents(state.studentsSearch);
+    });
+  }
+
+  if (studentsNextBtn) {
+    studentsNextBtn.addEventListener("click", () => {
+      const totalPages = getStudentsTotalPages();
+      if (state.studentsPage >= totalPages) return;
+      state.studentsPage += 1;
+      loadStudents(state.studentsSearch);
+    });
+  }
+
+  if (studentsLimitSelect) {
+    studentsLimitSelect.addEventListener("change", () => {
+      const next = Number.parseInt(studentsLimitSelect.value, 10);
+      if (!Number.isFinite(next) || next <= 0) return;
+      state.studentsLimit = next;
+      state.studentsPage = 1;
+      loadStudents(state.studentsSearch);
+    });
+  }
+
   studentSearch.addEventListener(
     "input",
     debounce((event) => {
@@ -627,6 +844,9 @@ function wireUpAttendance() {
 function wireUpSummary() {
   loadSummaryBtn.addEventListener("click", loadSummary);
   summarySort.addEventListener("change", loadSummary);
+  if (loadSummaryMoreBtn) {
+    loadSummaryMoreBtn.addEventListener("click", loadMoreSummary);
+  }
 }
 
 function wireUpStudentDetail() {
@@ -660,6 +880,7 @@ async function init() {
   wireUpAttendance();
   wireUpSummary();
   wireUpStudentDetail();
+  wireUpTeacherPassword();
 
   try {
     await loadTeacherProfile();

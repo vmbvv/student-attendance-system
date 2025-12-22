@@ -58,6 +58,23 @@
             />
           </div>
 
+          <div class="inline">
+            <button type="button" id="students-prev" class="secondary small">
+              Өмнөх
+            </button>
+            <span id="students-page" class="muted"></span>
+            <button type="button" id="students-next" class="secondary small">
+              Дараах
+            </button>
+            <label for="students-limit" class="muted">Хуудас бүр</label>
+            <select id="students-limit" class="small">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+
           <button type="button" id="toggle-add-student">Сурагч нэмэх</button>
           <form id="add-student-form" class="card spaced hidden">
             <div class="grid-two">
@@ -164,7 +181,55 @@
             <tbody id="summary-body"></tbody>
           </table>
         </div>
-        <div id="summary-status" class="status"></div>
+        <div class="panel-foot">
+          <div id="summary-status" class="status"></div>
+          <button
+            type="button"
+            id="load-summary-more"
+            class="secondary small hidden"
+          >
+            Цааш ачаалах
+          </button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Нууц үг солих</h2>
+        </div>
+        <form id="teacher-password-form" class="card spaced">
+          <div class="grid-two">
+            <div>
+              <label for="oldPassword">Хуучин Нууц үг</label>
+              <input
+                id="oldPassword"
+                name="oldPassword"
+                type="password"
+                required
+              />
+            </div>
+            <div>
+              <label for="newPassword">Шинэ Нууц үг</label>
+              <input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label for="confirmNewPassword">Шинэ Нууц үг давтах</label>
+            <input
+              id="confirmNewPassword"
+              name="confirmNewPassword"
+              type="password"
+              required
+            />
+          </div>
+          <button type="submit">Нууц үг шинэчлэх</button>
+          <div id="teacher-password-status" class="status"></div>
+        </form>
       </section>
     </main>
     <script src="/teacher/dashboard.js" type="module" defer></script>
