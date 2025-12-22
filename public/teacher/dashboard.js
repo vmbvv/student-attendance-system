@@ -1,5 +1,6 @@
 const headerDate = document.getElementById("header-date");
 const teacherIdBadge = document.getElementById("teacher-id");
+const logoutLink = document.getElementById("logout-link");
 const overviewStatus = document.getElementById("overview-status");
 const statStudents = document.getElementById("stat-students");
 const statMarked = document.getElementById("stat-marked");
@@ -41,22 +42,26 @@ const state = {
   teacherName: "",
 };
 
-function getCookieValue(name) {
-  return document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith(`${name}`))
-    ?.split("=")[1];
-}
-
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, {
     credentials: "same-origin",
     ...options,
   });
-  const data = await response.json();
-  if (!response.ok || data.ok === false) {
-    throw new Error(data.message || "Хүсэлт амжилтгүй");
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok || (data && data.ok === false)) {
+    const message =
+      (data && typeof data.message === "string" && data.message) ||
+      "Хүсэлт амжилтгүй";
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
   return data;
 }
@@ -82,15 +87,26 @@ function getLocalMonthString(sourceDate = new Date()) {
   return d.toISOString().slice(0, 7);
 }
 
+function wireUpLogout() {
+  if (!logoutLink) return;
+  logoutLink.addEventListener("click", async (event) => {
+    event.preventDefault();
+    try {
+      await fetchJson("/user/logout", { method: "POST" });
+    } catch {
+      // Ignore errors; always redirect to login page.
+    }
+    window.location.href = "/auth/login.html";
+  });
+}
+
 async function loadTeacherProfile() {
-  try {
-    const data = await fetchJson(`/teacher/${state.teacherId}/profile`);
-    const name = `${data.teacher.firstname} ${data.teacher.lastname}`.trim();
-    state.teacherName = name;
-    teacherIdBadge.textContent = `Teacher #${state.teacherId} - ${name}`;
-  } catch (err) {
-    teacherIdBadge.textContent = `Teacher #${state.teacherId}`;
-  }
+  const data = await fetchJson("/teacher/profile");
+  state.teacherId = data.teacher.id;
+
+  const name = `${data.teacher.firstname} ${data.teacher.lastname}`.trim();
+  state.teacherName = name;
+  teacherIdBadge.textContent = `Teacher #${data.teacher.id} - ${name}`;
 }
 
 function formatMonthLabel(month) {
@@ -140,9 +156,7 @@ function renderStudents(students) {
     const info = document.createElement("div");
     info.innerHTML = `<strong>${student.firstname} ${
       student.lastname
-    }</strong> <span class="muted">#${student.id}${
-      student.age ? " | " + student.age + " yrs " : ""
-    }</span>`;
+    }</strong> <span class="muted">#${student.id}</span>`;
 
     const actions = document.createElement("div");
     const removeBtn = document.createElement("button");
@@ -164,7 +178,7 @@ async function loadStudents(searchText = "") {
       ? `?search=${encodeURIComponent(searchText)}`
       : "";
     const data = await fetchJson(
-      `/teacher/${state.teacherId}/students${params}`
+      `/teacher/students${params}`
     );
     state.students = data;
     renderStudents(data);
@@ -240,9 +254,7 @@ async function loadAttendance() {
 
   try {
     const data = await fetchJson(
-      `/teacher/${state.teacherId}/attendance?date=${encodeURIComponent(
-        targetDate
-      )}`
+      `/teacher/attendance?date=${encodeURIComponent(targetDate)}`
     );
     state.attendanceCurrent = {};
     data.forEach((record) => {
@@ -284,7 +296,7 @@ async function saveAttendance() {
   try {
     await Promise.all(
       dirty.map((item) =>
-        fetchJson(`/teacher/${state.teacherId}/attendance`, {
+        fetchJson(`/teacher/attendance`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -315,9 +327,7 @@ async function loadSummary() {
   try {
     const sort = summarySort.value;
     const data = await fetchJson(
-      `/teacher/${state.teacherId}/summary${
-        sort ? `?sort=${encodeURIComponent(sort)}` : ""
-      }`
+      `/teacher/summary${sort ? `?sort=${encodeURIComponent(sort)}` : ""}`
     );
 
     if (!data.length) {
@@ -358,15 +368,22 @@ async function handleAddStudent(event) {
   event.preventDefault();
   addStudentStatus.textContent = "Сурагчийг хадгалж байна...";
 
+  const password = addStudentForm.password.value;
+  const confirmPassword = addStudentForm.confirmPassword.value;
+  if (password !== confirmPassword) {
+    addStudentStatus.textContent = "Нууц үг таарахгүй байна";
+    return;
+  }
+
   const payload = {
     firstname: addStudentForm.firstname.value.trim(),
     lastname: addStudentForm.lastname.value.trim(),
-    age: addStudentForm.age.value ? Number(addStudentForm.age.value) : null,
-    password: addStudentForm.password.value,
+    password,
+    confirmPassword,
   };
 
   try {
-    const data = await fetchJson(`/teacher/${state.teacherId}/students`, {
+    const data = await fetchJson(`/teacher/students`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -388,7 +405,7 @@ async function handleDeleteStudent(studentId, target) {
   target.disabled = true;
   target.textContent = "Сурагчийг хасаж байна.";
   try {
-    await fetchJson(`/teacher/${state.teacherId}/students/${studentId}`, {
+    await fetchJson(`/teacher/students/${studentId}`, {
       method: "DELETE",
     });
     if (String(state.selectedStudentId) === String(studentId)) {
@@ -532,7 +549,7 @@ async function loadStudentHistory() {
 
   try {
     const data = await fetchJson(
-      `/teacher/${state.teacherId}/students/${state.selectedStudentId}/attendance-history?month=${state.detailMonth}`
+      `/teacher/students/${state.selectedStudentId}/attendance-history?month=${state.detailMonth}`
     );
     state.detailMonth = data.month;
     state.studentRecords = data.records || [];
@@ -630,18 +647,6 @@ async function init() {
   state.attendanceDate = state.attendanceDate || getLocalDateString();
   state.detailMonth = state.detailMonth || getLocalMonthString();
 
-  const teacherId = getCookieValue("teacherId");
-  if (!teacherId) {
-    overviewStatus.textContent = "Эхлээд багшаар нэвтэрнэ үү";
-    attendanceStatus.textContent = "Нэвтэрсэн байх шаардлагатай";
-    summaryStatus.textContent = "Нэвтэрсэн байх шаардлагатай";
-    renderStudentDetail();
-    return;
-  }
-
-  state.teacherId = teacherId;
-  state.attendanceDate = getLocalDateString();
-  state.detailMonth = getLocalMonthString();
   headerDate.textContent = new Date().toLocaleString(undefined, {
     weekday: "long",
     month: "short",
@@ -650,12 +655,26 @@ async function init() {
   attendanceDateInput.value = state.attendanceDate;
   monthLabel.textContent = formatMonthLabel(state.detailMonth);
 
+  wireUpLogout();
   wireUpRoster();
   wireUpAttendance();
   wireUpSummary();
   wireUpStudentDetail();
 
-  await loadTeacherProfile();
+  try {
+    await loadTeacherProfile();
+  } catch (err) {
+    const status = err && err.status;
+    overviewStatus.textContent =
+      status === 401
+        ? "Эхлээд багшаар нэвтэрнэ үү"
+        : err.message || "Профайл ачаалахад алдаа гарлаа";
+    attendanceStatus.textContent = "Нэвтэрсэн байх шаардлагатай";
+    summaryStatus.textContent = "Нэвтэрсэн байх шаардлагатай";
+    renderStudentDetail();
+    return;
+  }
+
   await loadStudents();
   await loadAttendance();
   await loadSummary();

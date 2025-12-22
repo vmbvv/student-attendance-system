@@ -1,8 +1,10 @@
+import type { NextFunction, Request, Response } from "express";
+import type { AuthRole } from "../security/jwt.js";
 import { verifyAccessToken } from "../security/jwt.js";
 
-function getTokenFromRequest(req) {
+function getTokenFromRequest(req: Request): string | null {
   const cookieToken = req.cookies?.accessToken;
-  if (cookieToken) return cookieToken;
+  if (cookieToken) return String(cookieToken);
 
   const authHeader = req.headers.authorization || "";
   if (authHeader.startsWith("Bearer ")) {
@@ -12,7 +14,7 @@ function getTokenFromRequest(req) {
   return null;
 }
 
-export function requireAuth(req, res, next) {
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = getTokenFromRequest(req);
   if (!token) {
     return res.status(401).json({ ok: false, message: "Unauthorized" });
@@ -30,8 +32,8 @@ export function requireAuth(req, res, next) {
   }
 }
 
-export function requireRole(role) {
-  return (req, res, next) => {
+export function requireRole(role: AuthRole) {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.auth) {
       return res.status(401).json({ ok: false, message: "Unauthorized" });
     }
@@ -41,16 +43,3 @@ export function requireRole(role) {
     return next();
   };
 }
-
-export function requireParamUserId(paramName) {
-  return (req, res, next) => {
-    if (!req.auth) {
-      return res.status(401).json({ ok: false, message: "Unauthorized" });
-    }
-    if (String(req.auth.id) !== String(req.params[paramName])) {
-      return res.status(403).json({ ok: false, message: "Forbidden" });
-    }
-    return next();
-  };
-}
-

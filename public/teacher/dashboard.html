@@ -16,7 +16,7 @@
         </div>
         <div class="header-actions">
           <span id="teacher-id" class="pill"></span>
-          <a href="/auth/login.html">Системээс гарах</a>
+          <a href="/auth/login.html" id="logout-link">Системээс гарах</a>
         </div>
       </header>
 
@@ -72,12 +72,17 @@
             </div>
             <div class="grid-two">
               <div>
-                <label for="age">Нас</label>
-                <input id="age" name="age" type="number" min="0" />
-              </div>
-              <div>
                 <label for="password">Нууц үг</label>
                 <input id="password" name="password" type="password" required />
+              </div>
+              <div>
+                <label for="confirmPassword">Нууц үг давтах</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                />
               </div>
             </div>
             <button type="submit">Сурагч нэмэх</button>

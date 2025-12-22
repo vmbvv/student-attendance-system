@@ -4,18 +4,18 @@ import { timingSafeEqual } from "node:crypto";
 const BCRYPT_PATTERN = /^\$2[abxy]\$\d{2}\$/;
 const DEFAULT_SALT_ROUNDS = 10;
 
-export function isBcryptHash(value) {
+export function isBcryptHash(value: unknown): boolean {
   return BCRYPT_PATTERN.test(String(value || ""));
 }
 
-function safeEqualStrings(a, b) {
+function safeEqualStrings(a: unknown, b: unknown): boolean {
   const aBuf = Buffer.from(String(a));
   const bBuf = Buffer.from(String(b));
   if (aBuf.length !== bBuf.length) return false;
   return timingSafeEqual(aBuf, bBuf);
 }
 
-export async function hashPassword(password) {
+export async function hashPassword(password: string): Promise<string> {
   const configuredRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
   const saltRounds =
     Number.isFinite(configuredRounds) && configuredRounds > 0
@@ -24,7 +24,10 @@ export async function hashPassword(password) {
   return bcrypt.hash(String(password), saltRounds);
 }
 
-export async function verifyPassword(password, storedPassword) {
+export async function verifyPassword(
+  password: string,
+  storedPassword: unknown
+): Promise<boolean> {
   const plain = String(password);
   const stored = String(storedPassword || "");
 
@@ -36,3 +39,4 @@ export async function verifyPassword(password, storedPassword) {
 
   return safeEqualStrings(plain, stored);
 }
+
