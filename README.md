@@ -23,6 +23,7 @@
 - `GET /teacher/students`
 - `POST /teacher/students`
 - `DELETE /teacher/students/:studentId`
+- `PATCH /teacher/password`
 - `PUT /teacher/attendance`
 - `GET /teacher/attendance`
 - `GET /teacher/summary`

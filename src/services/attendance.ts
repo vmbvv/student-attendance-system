@@ -79,21 +79,30 @@ export async function getAttendanceByDateService(
   return rows;
 }
 
+export interface TeacherSummaryRow {
+  student_id: UserId;
+  firstname: string;
+  lastname: string;
+  total_days: number;
+  present_count: number;
+  absent_count: number;
+  excused_count: number;
+  present_percent: number | null;
+}
+
+export interface PaginatedTeacherSummaryResult {
+  items: TeacherSummaryRow[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export async function getTeacherSummaryService(
   teacherId: string,
-  sort?: string
-): Promise<
-  Array<{
-    student_id: UserId;
-    firstname: string;
-    lastname: string;
-    total_days: number;
-    present_count: number;
-    absent_count: number;
-    excused_count: number;
-    present_percent: number;
-  }>
-> {
+  sort: string,
+  page: number,
+  limit: number
+): Promise<PaginatedTeacherSummaryResult> {
   const sortOptions: Record<string, string> = {
     name: "lastname ASC, firstname ASC",
     present_percent: "present_percent DESC",
@@ -102,21 +111,27 @@ export async function getTeacherSummaryService(
     absent_count: "absent_count DESC",
   };
 
-  const orderBy = sortOptions[sort || ""] || "lastname ASC, firstname ASC";
-  const { rows } = await db.query<{
-    student_id: UserId;
-    firstname: string;
-    lastname: string;
-    total_days: number;
-    present_count: number;
-    absent_count: number;
-    excused_count: number;
-    present_percent: number;
-  }>(
-    `SELECT student_id, firstname, lastname, total_days, present_count, absent_count, excused_count, present_percent FROM v_student_attendance_summary WHERE teacher_id = $1 ORDER BY ${orderBy}`,
+  const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(limit, 1), 200) : 25;
+  const requestedPage = Number.isFinite(page) ? Math.max(page, 1) : 1;
+
+  const countResult = await db.query<{ total: number }>(
+    "SELECT COUNT(*)::int AS total FROM v_student_attendance_summary WHERE teacher_id = $1",
     [teacherId]
   );
-  return rows;
+  const total = countResult.rows[0]?.total ?? 0;
+  const totalPages = total > 0 ? Math.ceil(total / safeLimit) : 1;
+  const safePage = Math.min(requestedPage, totalPages);
+  const offset = (safePage - 1) * safeLimit;
+
+  const baseOrderBy = sortOptions[sort || ""] || "lastname ASC, firstname ASC";
+  const orderBy = `${baseOrderBy}, student_id ASC`;
+
+  const { rows } = await db.query<TeacherSummaryRow>(
+    `SELECT student_id, firstname, lastname, total_days, present_count, absent_count, excused_count, present_percent FROM v_student_attendance_summary WHERE teacher_id = $1 ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
+    [teacherId, safeLimit, offset]
+  );
+
+  return { items: rows, total, page: safePage, limit: safeLimit };
 }
 
 export async function getStudentAttendanceHistoryService(
@@ -183,4 +198,3 @@ export async function getStudentAttendanceHistoryService(
     records,
   };
 }
-

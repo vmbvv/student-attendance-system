@@ -88,9 +88,16 @@ export async function getTeacherSummary(req: Request, res: Response) {
   }
 
   try {
-    const sort = typeof req.query.sort === "string" ? req.query.sort : "";
-    const result = await getTeacherSummaryService(teacherId, sort);
-    return res.json(result);
+    const sort =
+      typeof req.query.sort === "string" ? req.query.sort.trim() : "";
+    const rawPage = typeof req.query.page === "string" ? req.query.page : "";
+    const rawLimit = typeof req.query.limit === "string" ? req.query.limit : "";
+
+    const page = rawPage ? Number.parseInt(rawPage, 10) : 1;
+    const limit = rawLimit ? Number.parseInt(rawLimit, 10) : 25;
+
+    const result = await getTeacherSummaryService(teacherId, sort, page, limit);
+    return res.json({ ok: true, ...result });
   } catch (err) {
     console.error("Failed to get teacher summary", err);
     return res.status(500).json({ ok: false, message: "Internal server error" });

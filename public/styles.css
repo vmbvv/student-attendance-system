@@ -107,6 +107,27 @@ button:hover {
   opacity: 0.95;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: #edf1f7;
+  color: #1d1f23;
+  border: 1px solid var(--border);
+}
+
+button.small {
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+select.small {
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
 section {
   background: var(--card);
   border: 1px solid var(--border);
