@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { requireAuth, requireParamUserId, requireRole } from "../middleware/auth.js";
 import {
   getStudents,
   createStudent,
@@ -13,6 +14,13 @@ import {
 } from "../controllers/attendance.js";
 
 export const teacherRouters = new Router();
+
+teacherRouters.use(
+  "/:teacherId",
+  requireAuth,
+  requireRole("teacher"),
+  requireParamUserId("teacherId")
+);
 
 teacherRouters.get("/:teacherId/students", getStudents);
 teacherRouters.post("/:teacherId/students", createStudent);

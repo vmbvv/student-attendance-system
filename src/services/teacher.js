@@ -1,4 +1,5 @@
 import { db } from "../db.js";
+import { hashPassword } from "../security/passwords.js";
 
 export async function getStudentsService(teacherId, search) {
   // Зөвхөн энэ багшид харьяалагдах сурагчдийг олох
@@ -25,9 +26,10 @@ export async function createStudentService(
   age,
   password
 ) {
+  const passwordHash = await hashPassword(password);
   const { rows } = await db.query(
     "INSERT INTO users (firstname, lastname, age, password, role, teacher_id) VALUES ($1, $2, $3, $4, 'student', $5) RETURNING id",
-    [firstname, lastname, age ?? null, password, teacherId]
+    [firstname, lastname, age ?? null, passwordHash, teacherId]
   );
   return { ok: true, id: rows[0].id };
 }

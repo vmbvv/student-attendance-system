@@ -4,12 +4,16 @@ import {
   loginStudentService,
   logoutService,
 } from "../services/user.js";
+import { signAccessToken } from "../security/jwt.js";
 
-const authCookieOptions = {
-  httpOnly: false,
+const baseCookieOptions = {
   sameSite: "lax",
   path: "/",
+  secure: process.env.NODE_ENV === "production",
 };
+
+const idCookieOptions = { ...baseCookieOptions, httpOnly: false };
+const accessTokenCookieOptions = { ...baseCookieOptions, httpOnly: true };
 
 export async function registerTeacher(req, res) {
   try {
@@ -34,11 +38,15 @@ export async function loginTeacher(req, res) {
     const result = await loginTeacherService(id, password);
 
     if (!result.ok) {
+      res.clearCookie("accessToken", accessTokenCookieOptions);
       return res.status(401).json(result);
     }
 
-    res.clearCookie("studentId", authCookieOptions);
-    res.cookie("teacherId", result.id, authCookieOptions);
+    const token = signAccessToken({ id: result.id, role: "teacher" });
+
+    res.clearCookie("studentId", idCookieOptions);
+    res.cookie("teacherId", result.id, idCookieOptions);
+    res.cookie("accessToken", token, accessTokenCookieOptions);
 
     return res.json(result);
   } catch (err) {
@@ -54,11 +62,15 @@ export async function loginStudent(req, res) {
     const result = await loginStudentService(id, password);
 
     if (!result.ok) {
+      res.clearCookie("accessToken", accessTokenCookieOptions);
       return res.status(401).json(result);
     }
 
-    res.clearCookie("teacherId", authCookieOptions);
-    res.cookie("studentId", result.id, authCookieOptions);
+    const token = signAccessToken({ id: result.id, role: "student" });
+
+    res.clearCookie("teacherId", idCookieOptions);
+    res.cookie("studentId", result.id, idCookieOptions);
+    res.cookie("accessToken", token, accessTokenCookieOptions);
 
     return res.json(result);
   } catch (err) {
@@ -70,8 +82,9 @@ export async function loginStudent(req, res) {
 export async function logout(req, res) {
   //  logout хийхэд cookie-г арилгах (res.clearCookie / document.cookie)
   try {
-    res.clearCookie("teacherId", authCookieOptions);
-    res.clearCookie("studentId", authCookieOptions);
+    res.clearCookie("teacherId", idCookieOptions);
+    res.clearCookie("studentId", idCookieOptions);
+    res.clearCookie("accessToken", accessTokenCookieOptions);
     const result = await logoutService();
     return res.json(result);
   } catch (err) {

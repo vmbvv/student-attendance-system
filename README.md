@@ -5,6 +5,11 @@
 - Run dev server: `npm run dev`
 - Visit: http://localhost:3000/auth/login.html
 
+### Auth
+
+- Passwords are stored as bcrypt hashes (new and updated passwords).
+- Login sets an `accessToken` httpOnly JWT cookie; `/teacher/*` and `/student/*` routes require it.
+
 ### API Routes
 
 - `GET /api/health`

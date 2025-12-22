@@ -1,4 +1,5 @@
 import { db } from "../db.js";
+import { hashPassword, verifyPassword } from "../security/passwords.js";
 
 function getMonthBounds(month) {
   // YYYY-MM; [start, end) bounds.
@@ -73,12 +74,13 @@ export async function changePasswordService(
     return { ok: false, message: "Сурагч олдсонгүй" };
   }
 
-  if (rows[0].password !== oldPassword) {
+  if (!(await verifyPassword(oldPassword, rows[0].password))) {
     return { ok: false, message: "Нууц үг буруу байна" };
   }
 
+  const passwordHash = await hashPassword(newPassword);
   await db.query("UPDATE users SET password = $1 WHERE id = $2", [
-    newPassword,
+    passwordHash,
     studentId,
   ]);
   return { ok: true };

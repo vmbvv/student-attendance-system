@@ -5,18 +5,6 @@ import {
   getStudentAttendanceHistoryService,
 } from "../services/attendance.js";
 
-function verifyTeacherCookie(req, res, teacherId) {
-  const cookieTeacherId = req.cookies?.teacherId;
-  if (!cookieTeacherId || String(cookieTeacherId) !== String(teacherId)) {
-    res.status(401).json({
-      ok: false,
-      message: "Багшийн cookie буруу байна",
-    });
-    return false;
-  }
-  return true;
-}
-
 function getLocalDateString(sourceDate = new Date()) {
   const d = new Date(sourceDate);
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
@@ -26,7 +14,6 @@ function getLocalDateString(sourceDate = new Date()) {
 export async function upsertAttendance(req, res) {
   const { teacherId } = req.params;
   const { studentId, date, attendance } = req.body;
-  if (!verifyTeacherCookie(req, res, teacherId)) return;
 
   try {
     const result = await upsertAttendanceService(
@@ -38,14 +25,13 @@ export async function upsertAttendance(req, res) {
     const status = result.ok === false ? 400 : 200;
     return res.status(status).json(result);
   } catch (err) {
-    console.error("Ирц бүртгэхэд алдаа гарлаа", err);
-    return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
+    console.error("Failed to upsert attendance", err);
+    return res.status(500).json({ ok: false, message: "Internal server error" });
   }
 }
 
 export async function getAttendanceByDate(req, res) {
   const { teacherId } = req.params;
-  if (!verifyTeacherCookie(req, res, teacherId)) return;
 
   try {
     const { date } = req.query;
@@ -53,28 +39,26 @@ export async function getAttendanceByDate(req, res) {
     const result = await getAttendanceByDateService(teacherId, targetDate);
     return res.json(result);
   } catch (err) {
-    console.error("Алдаа гарлаа", err);
-    return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
+    console.error("Failed to get attendance by date", err);
+    return res.status(500).json({ ok: false, message: "Internal server error" });
   }
 }
 
 export async function getTeacherSummary(req, res) {
   const { teacherId } = req.params;
-  if (!verifyTeacherCookie(req, res, teacherId)) return;
 
   try {
     const { sort } = req.query;
     const result = await getTeacherSummaryService(teacherId, sort);
     return res.json(result);
   } catch (err) {
-    console.error("Алдаа гарлаа", err);
-    return res.status(500).json({ ok: false, message: "Серверт алдаа гарлаа" });
+    console.error("Failed to get teacher summary", err);
+    return res.status(500).json({ ok: false, message: "Internal server error" });
   }
 }
 
 export async function getStudentAttendanceHistory(req, res) {
   const { teacherId, studentId } = req.params;
-  if (!verifyTeacherCookie(req, res, teacherId)) return;
 
   try {
     const { month } = req.query;
@@ -89,10 +73,8 @@ export async function getStudentAttendanceHistory(req, res) {
     }
     return res.json(result);
   } catch (err) {
-    console.error("Алдаа гарлаа", err);
-    return res.status(500).json({
-      ok: false,
-      message: "Серверт алдаа гарлаа",
-    });
+    console.error("Failed to get student attendance history", err);
+    return res.status(500).json({ ok: false, message: "Internal server error" });
   }
 }
+
