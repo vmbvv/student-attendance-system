@@ -1,5 +1,6 @@
 const headerDate = document.getElementById("header-date");
 const studentBadge = document.getElementById("student-badge");
+const logoutLink = document.getElementById("logout-link");
 const monthPrevBtn = document.getElementById("month-prev");
 const monthNextBtn = document.getElementById("month-next");
 const monthLabel = document.getElementById("month-label");
@@ -20,35 +21,50 @@ const state = {
   studentName: "",
 };
 
-function getCookieValue(name) {
-  return document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith(`${name}=`))
-    ?.split("=")[1];
-}
-
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, {
     credentials: "same-origin",
     ...options,
   });
-  const data = await response.json();
-  if (!response.ok || data.ok === false) {
-    throw new Error(data.message || "Хүсэлт амжилтгүй");
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok || (data && data.ok === false)) {
+    const message =
+      (data && typeof data.message === "string" && data.message) ||
+      "Хүсэлт амжилтгүй";
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
   return data;
 }
 
+function wireUpLogout() {
+  if (!logoutLink) return;
+  logoutLink.addEventListener("click", async (event) => {
+    event.preventDefault();
+    try {
+      await fetchJson("/user/logout", { method: "POST" });
+    } catch {
+      // Ignore errors; always redirect to login page.
+    }
+    window.location.href = "/auth/login.html";
+  });
+}
+
 async function loadStudentProfile() {
-  try {
-    const data = await fetchJson(`/student/${state.studentId}/profile`);
-    const name = `${data.student.firstname} ${data.student.lastname}`.trim();
-    state.studentName = name;
-    studentBadge.textContent = `Student #${state.studentId} - ${name}`;
-  } catch (err) {
-    studentBadge.textContent = `Student #${state.studentId}`;
-  }
+  const data = await fetchJson(`/student/profile`);
+  state.studentId = data.student.id;
+
+  const name = `${data.student.firstname} ${data.student.lastname}`.trim();
+  state.studentName = name;
+  studentBadge.textContent = `Student #${data.student.id} - ${name}`;
 }
 
 function formatMonthLabel(month) {
@@ -154,7 +170,7 @@ async function loadAttendance() {
   calendarStatus.textContent = "Ирцийг ачаалж байна";
   try {
     const data = await fetchJson(
-      `/student/${state.studentId}/attendance?month=${state.detailMonth}`
+      `/student/attendance?month=${state.detailMonth}`
     );
     state.detailMonth = data.month;
     state.records = data.records || [];
@@ -195,12 +211,18 @@ passwordForm.addEventListener("submit", async (event) => {
   const payload = {
     oldPassword: passwordForm.oldPassword.value,
     newPassword: passwordForm.newPassword.value,
+    confirmNewPassword: passwordForm.confirmNewPassword.value,
   };
+
+  if (payload.newPassword !== payload.confirmNewPassword) {
+    passwordStatus.textContent = "Нууц үг таарахгүй байна";
+    return;
+  }
 
   passwordStatus.textContent = "Нууц үг сольж байна";
 
   try {
-    await fetchJson(`/student/${studentId}/password`, {
+    await fetchJson(`/student/password`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -213,15 +235,6 @@ passwordForm.addEventListener("submit", async (event) => {
 });
 
 async function init() {
-  const studentId = getCookieValue("studentId");
-  if (!studentId) {
-    calendarStatus.textContent = "Эхлээд сурагчаар нэвтэрнэ үү";
-    passwordStatus.textContent =
-      "Нууц үг солиход нэвтэрч орсон байх шаардлагатай";
-    return;
-  }
-  state.studentId = studentId;
-  studentBadge.textContent = `Student #${studentId}`;
   headerDate.textContent = new Date().toLocaleString(undefined, {
     weekday: "long",
     month: "short",
@@ -229,8 +242,22 @@ async function init() {
   });
   monthLabel.textContent = formatMonthLabel(state.detailMonth);
 
+  wireUpLogout();
   wireUpCalendar();
-  await loadStudentProfile();
+
+  try {
+    await loadStudentProfile();
+  } catch (err) {
+    const status = err && err.status;
+    calendarStatus.textContent =
+      status === 401
+        ? "Эхлээд сурагчаар нэвтэрнэ үү"
+        : err.message || "Профайл ачаалахад алдаа гарлаа";
+    passwordStatus.textContent =
+      "Нууц үг солиход нэвтэрч орсон байх шаардлагатай";
+    return;
+  }
+
   await loadAttendance();
 }
 

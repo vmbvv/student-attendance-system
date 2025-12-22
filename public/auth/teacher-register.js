@@ -4,12 +4,25 @@ const result = document.getElementById("result");
 form.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  const password = form.password.value;
+  const confirmPassword = form.confirmPassword.value;
+
+  if (password !== confirmPassword) {
+    result.textContent = "Нууц үг таарахгүй байна";
+    return;
+  }
+
   const payload = {
     firstname: form.firstname.value.trim(),
     lastname: form.lastname.value.trim(),
-    age: form.age.value ? Number(form.age.value) : null,
-    password: form.password.value,
+    password,
+    confirmPassword,
   };
+
+  const registrationToken = form.registrationToken?.value?.trim();
+  if (registrationToken) {
+    payload.registrationToken = registrationToken;
+  }
 
   // fetch ашиглан /user/register-teacher рүү POST илгээх
   result.textContent = "Аккоунт үүсгэж байна...";
